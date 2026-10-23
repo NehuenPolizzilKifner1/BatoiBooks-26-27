@@ -1,12 +1,14 @@
 import User from './user.class.js'
+import { getDBUsers, addDBUser, removeDBUser, changeDBUser } from '../services/api.js'
 
 export default class Users {
     constructor() {
         this.data = []
     }
 
-    populate(users) {
-        this.data = users.map(user => new User(
+    async fetchAll() {
+        const usuarios = await getDBUsers()
+        this.data = usuarios.map(user => new User(
             user.id,
             user.nick,
             user.email,
@@ -14,16 +16,17 @@ export default class Users {
         ))
     }
 
-    addUser(usuario) {
-        const newId = Math.max(...this.data.map(user => user.id)) + 1
-        const newUser = new User(newId, usuario.nick, usuario.email, usuario.password)
+    async addUser(usuario) {
+        const user = await addDBUser(usuario)
+        const newUser = new User(user.id, user.nick, user.email, user.password)
 
         this.data.push(newUser)
 
         return newUser
     }
 
-    removeUser(removeId) {
+    async removeUser(removeId) {
+        await removeDBUser(removeId)
         const index = this.data.findIndex(user => user.id === removeId)
 
         if (index === -1) {
@@ -33,14 +36,15 @@ export default class Users {
         this.data.splice(index, 1)
     }
 
-    changeUser(payload) {
+    async changeUser(payload) {
+        const usuarioEditado = await changeDBUser(payload)
         const index = this.data.findIndex(user => user.id === payload.id)
 
         if (index === -1) {
             throw new Error()
         }
 
-        const newUser = new User(payload.id, payload.nick, payload.email, payload.password)
+        const newUser = new User(usuarioEditado.id, usuarioEditado.nick, usuarioEditado.email, usuarioEditado.password)
 
         this.data[index] = newUser
 

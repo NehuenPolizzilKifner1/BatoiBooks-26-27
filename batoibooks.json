@@ -1,4 +1,4 @@
-const data = {
+{
   "courses": [
     {
       "id": "3",
@@ -1859,6 +1859,18 @@ const data = {
       "nick": "Ximo",
       "id": 5,
       "password": "1234"
+    },
+    {
+      "nick": "prueba",
+      "email": "prueba@example.com",
+      "password": "1234",
+      "id": 6
+    },
+    {
+      "nick": "prueba",
+      "email": "prueba@example.com",
+      "password": "1234",
+      "id": 7
     }
   ],
   "books": [
@@ -1936,5 +1948,3 @@ const data = {
     }
   ]
 }
-
-export default data

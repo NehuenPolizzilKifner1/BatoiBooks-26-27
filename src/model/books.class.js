@@ -1,24 +1,27 @@
 import Book from './book.class.js'
+import { getDBBooks, addDBBook, removeDBBook, changeDBBook } from '../services/api.js'
 const pub = "Apunts"
 export default class Books {
     constructor() {
         this.data = []
     }
 
-    populate(books) {
-        this.data = books.map(book => new Book(book))
+    async fetchAll() {
+        const libros = await getDBBooks()
+        this.data = libros.map(book => new Book(book))
     }
 
-    addBook(payload) {
-        const newId = this.data.length === 0 ? 1 : Math.max(...this.data.map(book => book.id)) + 1
-        const newBook = new Book({ ...payload, id: newId })
+    async addBook(payload) {
+        const libro = await addDBBook(payload)
+        const newBook = new Book(libro)
 
         this.data.push(newBook)
 
         return newBook
     }
 
-    removeBook(removeId) {
+    async removeBook(removeId) {
+        await removeDBBook(removeId)
         const index = this.data.findIndex(book => book.id === removeId)
 
         if (index === -1) {
@@ -28,14 +31,15 @@ export default class Books {
         this.data.splice(index, 1)
     }
 
-    changeBook(newData) {
+    async changeBook(newData) {
+        const libroEditado = await changeDBBook(newData)
         const index = this.data.findIndex(book => book.id === newData.id)
 
         if (index === -1) {
             throw new Error()
         }
 
-        const newBook = new Book(newData)
+        const newBook = new Book(libroEditado)
 
         this.data[index] = newBook
 
