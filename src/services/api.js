@@ -1,114 +1,85 @@
 const url = import.meta.env.VITE_URL_API
 
-async function getDBBooks() {
-    const response = await fetch(url + '/books')
+async function request(path, options = {}) {
+    const response = await fetch(url + path, options)
 
     if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
+        throw new Error(
+            `Error ${response.status} de la BBDD: ${response.statusText}`
+        )
     }
 
-    const data = await response.json()
-    return data
+    const text = await response.text()
+
+    if (!text) {
+        return undefined
+    }
+
+    return JSON.parse(text)
+}
+
+async function getDBBooks() {
+    return await request('/books')
 }
 
 async function getDBUsers() {
-    const response = await fetch(url + '/users')
-
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
-
-    const data = await response.json()
-    return data
+    return await request('/users')
 }
 
 async function getDBModules() {
-    const response = await fetch(url + '/modules')
-
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
-
-    const data = await response.json()
-    return data
+    return await request('/modules')
 }
 
 async function addDBBook(newBook) {
-    const response = await fetch(url + '/books', {
+    return await request('/books', {
         method: 'POST',
         body: JSON.stringify(newBook),
         headers: {
             'Content-Type': 'application/json'
         }
     })
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
-
-    const data = await response.json()
-    return data
 }
 
 async function addDBUser(newUser) {
-    const response = await fetch(url + '/users', {
+    return await request('/users', {
         method: 'POST',
         body: JSON.stringify(newUser),
         headers: {
             'Content-Type': 'application/json'
         }
     })
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
-
-    const data = await response.json()
-    return data
 }
 
 async function removeDBBook(bookId) {
-    const response = await fetch(url + '/books/' + bookId, {
+    await request('/books/' + bookId, {
         method: 'DELETE'
     })
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
 }
 
 async function removeDBUser(userId) {
-    const response = await fetch(url + '/users/' + userId, {
+    await request('/users/' + userId, {
         method: 'DELETE'
     })
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
 }
 
 async function changeDBBook(book) {
-    const response = await fetch(url + '/books/' + book.id, {
+    return await request('/books/' + book.id, {
         method: 'PUT',
         body: JSON.stringify(book),
         headers: {
             'Content-Type': 'application/json'
         }
     })
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
-    return await response.json()
 }
 
 async function changeDBUser(user) {
-    const response = await fetch(url + '/users/' + userId, {
+    return await request('/users/' + user.id, {
         method: 'PUT',
         body: JSON.stringify(user),
         headers: {
             'Content-Type': 'application/json'
         }
     })
-    if (!response.ok) {
-        throw `Error ${response.status} de la BBDD: ${response.statusText}`
-    }
-    return await response.json()
 }
 
 export {

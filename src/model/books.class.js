@@ -22,22 +22,14 @@ export default class Books {
 
     async removeBook(removeId) {
         await removeDBBook(removeId)
-        const index = this.data.findIndex(book => book.id === removeId)
-
-        if (index === -1) {
-            throw new Error()
-        }
+        const index = this.getBookIndexById(removeId)
 
         this.data.splice(index, 1)
     }
 
     async changeBook(newData) {
         const libroEditado = await changeDBBook(newData)
-        const index = this.data.findIndex(book => book.id === newData.id)
-
-        if (index === -1) {
-            throw new Error()
-        }
+        const index = this.getBookIndexById(newData.id)
 
         const newBook = new Book(libroEditado)
 
@@ -58,12 +50,12 @@ export default class Books {
     }
 
     getBookIndexById(bookId) {
-        const bookByID = this.data.findIndex(bookByID => bookByID.id === bookId)
+        const indexByID = this.data.findIndex(indexByID => indexByID.id === bookId)
 
-        if (bookByID === -1) {
+        if (indexByID === -1) {
             throw new Error()
         }
-        return bookByID
+        return indexByID
 
     }
 
@@ -88,11 +80,8 @@ export default class Books {
         const total = this.data.reduce((sum, book) => sum + book.price, 0)
         const average = (total / this.data.length).toFixed(2) + ' €'
 
-        if (!average) {
-            throw new Error()
-        } else {
-            return average
-        }
+        return average
+
     }
 
     booksOfTypeNotes() {
@@ -112,17 +101,7 @@ export default class Books {
     booksNotSold() {
         return this.data.filter(book => book.soldDate === "")
     }
-
-    incrementPriceOfBooks() {
-        const libros = this.data.map(book => ({ ...book, price: book.price * (1 + 10 / 100) }))
-
-        if (!libros) {
-            throw new Error()
-        } else {
-            return libros
-        }
-    }
-
+    
     toString() {
         return this.data.map(book => book.toString()).join("\n")
     }

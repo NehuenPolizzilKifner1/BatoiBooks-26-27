@@ -6,19 +6,23 @@ export default class Users {
         this.data = []
     }
 
-    async fetchAll() {
-        const usuarios = await getDBUsers()
-        this.data = usuarios.map(user => new User(
+    toUser(user) {
+        return new User(
             user.id,
             user.nick,
             user.email,
             user.password
-        ))
+        )
+    }
+
+    async fetchAll() {
+        const usuarios = await getDBUsers()
+        this.data = usuarios.map(user => this.toUser(user))
     }
 
     async addUser(usuario) {
         const user = await addDBUser(usuario)
-        const newUser = new User(user.id, user.nick, user.email, user.password)
+        const newUser = this.toUser(user)
 
         this.data.push(newUser)
 
@@ -27,24 +31,16 @@ export default class Users {
 
     async removeUser(removeId) {
         await removeDBUser(removeId)
-        const index = this.data.findIndex(user => user.id === removeId)
-
-        if (index === -1) {
-            throw new Error()
-        }
+        const index = this.getUserIndexById(removeId)
 
         this.data.splice(index, 1)
     }
 
     async changeUser(payload) {
         const usuarioEditado = await changeDBUser(payload)
-        const index = this.data.findIndex(user => user.id === payload.id)
+        const index = this.getUserIndexById(payload.id)
 
-        if (index === -1) {
-            throw new Error()
-        }
-
-        const newUser = new User(usuarioEditado.id, usuarioEditado.nick, usuarioEditado.email, usuarioEditado.password)
+        const newUser = this.toUser(usuarioEditado)
 
         this.data[index] = newUser
 
@@ -61,12 +57,12 @@ export default class Users {
     }
 
     getUserIndexById(userId) {
-        const userByID = this.data.findIndex(userByID => userByID.id === userId)
+        const indexByID = this.data.findIndex(indexByID => indexByID.id === userId)
 
-        if (userByID === -1) {
+        if (indexByID === -1) {
             throw new Error()
         }
-        return userByID
+        return indexByID
     }
 
     getUserByNickName(userNick) {

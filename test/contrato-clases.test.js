@@ -35,8 +35,7 @@ const CONTRATO = {
     'populate', 'addBook', 'removeBook', 'changeBook', 'toString',
     'getBookById', 'getBookIndexById', 'bookExists', 'booksFromUser',
     'booksFromModule', 'booksCheeperThan', 'booksWithStatus',
-    'averagePriceOfBooks', 'booksOfTypeNotes', 'booksNotSold',
-    'incrementPriceOfBooks'
+    'averagePriceOfBooks', 'booksOfTypeNotes', 'booksNotSold'
   ],
   users: [
     'populate', 'addUser', 'removeUser', 'changeUser', 'toString',
