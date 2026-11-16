@@ -50,7 +50,7 @@ ssh -i "$CLAVE" -o BatchMode=yes "$SERVIDOR" \
 echo "[3/3] Publicando nueva versión..."
 
 rsync -az --delete \
-    --chmod=D2750,F640 --chown=deploy:www-data\
+    --chmod=D2750,F640 \
     -e "ssh -i $CLAVE -o BatchMode=yes" \
     dist/ "$SERVIDOR:$DESTINO"
 
@@ -61,4 +61,4 @@ ssh -i "$CLAVE" -o BatchMode=yes "$SERVIDOR" \
 echo "=================================="
 echo " DESPLIEGUE COMPLETADO CORRECTAMENTE"
 echo "=================================="
-echo "Aplicación: https://app.52-204-190-92.sslip.io"
+echo "Aplicación desplegada: https://app.52-204-190-92.sslip.io"

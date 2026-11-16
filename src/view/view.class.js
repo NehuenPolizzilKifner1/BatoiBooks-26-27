@@ -1,26 +1,12 @@
 export default class View {
 
-    bindEvents(onAddBook, onRemoveBook) {
-        document.getElementById('remove-btn').addEventListener('click', (event) => {
-
-            event.preventDefault()
-
-            const id = document.getElementById('id-remove').value
-
-            if (!id) {
-                this.showMessage('error', 'Debes introducir un ID.')
-                return
-            }
-
-            onRemoveBook(Number(id))
-
-        })
+    bindEvents(onSaveBook, onRemoveBook, onEditBook, onAddToCart, onRouteChange, onResetForm) {
 
         document.getElementById('bookForm').addEventListener('submit', (event) => {
 
             event.preventDefault()
 
-            const newBook = {
+            const bookData = {
                 moduleCode: document.getElementById('moduleCode').value,
                 publisher: document.getElementById('publisher').value,
                 price: Number(document.getElementById('price').value),
@@ -28,12 +14,69 @@ export default class View {
                 status: document.querySelector('input[name="status"]:checked').value,
                 photo: document.getElementById('photo').value,
                 comments: document.getElementById('comments').value,
-                soldDate: ''
             }
 
-            onAddBook(newBook)
+            onSaveBook(bookData)
 
         })
+
+        document.getElementById('bookForm').addEventListener('reset', () => {
+            onResetForm()
+        })
+
+        document.getElementById('list').addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-action]')
+
+            if (!button) {
+                return
+            }
+
+            const card = button.closest('.card')
+
+            if (!card) {
+                return
+            }
+
+            const id = Number(card.dataset.id)
+            const action = button.dataset.action
+
+            if (action === 'delete') {
+                onRemoveBook(id)
+            } else if (action === 'edit') {
+                onEditBook(id)
+            } else if (action === 'cart') {
+                onAddToCart(id)
+            }
+        })
+
+        window.addEventListener('hashchange', () => {
+            onRouteChange(window.location.hash)
+        })
+    }
+
+    // Muestra una página y oculta las demás
+    showPage(pageId) {
+        const pages = document.querySelectorAll('main > div')
+
+        pages.forEach(page => {
+            page.classList.add('hidden')
+        })
+
+        const selectedPage = document.getElementById(pageId)
+
+        if (selectedPage) {
+            selectedPage.classList.remove('hidden')
+        }
+    }
+
+    // Cambia la ruta de la aplicación
+    navigateTo(route) {
+        window.location.hash = route
+    }
+
+    // Devuelve la ruta actual
+    getCurrentRoute() {
+        return window.location.hash
     }
 
     renderModuleOptions(module) {
@@ -47,7 +90,7 @@ export default class View {
         llistatModulos.append(moduleUI)
     }
 
-    renderBook(book, modules) {
+    renderBook(book, modules, userId) {
         const llistatLibros = document.getElementById('list')
 
         const bookUI = document.createElement('div')
@@ -82,9 +125,36 @@ export default class View {
         comments.textContent = book.comments
 
         const price = document.createElement('h4')
-        price.textContent = `${book.price}€`
+        price.textContent = `${book.price} €`
 
-        content.append(title, publisher, pages, status, sold, comments, price)
+        const actions = document.createElement('div')
+        actions.className = 'book-actions'
+
+        if (Number(book.userId) === userId) {
+            const editButton = document.createElement('button')
+            editButton.type = 'button'
+            editButton.setAttribute('aria-label', 'Editar')
+            editButton.dataset.action = 'edit'
+            editButton.innerHTML = '<span class="material-icons">edit</span>'
+
+            const deleteButton = document.createElement('button')
+            deleteButton.type = 'button'
+            deleteButton.setAttribute('aria-label', 'Borrar')
+            deleteButton.dataset.action = 'delete'
+            deleteButton.innerHTML = '<span class="material-icons">delete</span>'
+
+            actions.append(editButton, deleteButton)
+        } else {
+            const cartButton = document.createElement('button')
+            cartButton.type = 'button'
+            cartButton.setAttribute('aria-label', 'Añadir al carrito')
+            cartButton.dataset.action = 'cart'
+            cartButton.innerHTML = '<span class="material-icons">add_shopping_cart</span>'
+
+            actions.append(cartButton)
+        }
+
+        content.append(title, publisher, pages, status, sold, comments, price, actions)
         bookUI.append(image, content)
 
         llistatLibros.append(bookUI)
@@ -97,11 +167,33 @@ export default class View {
             bookUI.remove()
         }
 
-        document.getElementById('id-remove').value = ''
+    }
+
+    updateBookCard(book, modules, userId) {
+        const bookUI = document.querySelector(`#list .card[data-id="${book.id}"]`)
+
+        if (!bookUI) {
+            this.renderBook(book, modules, userId)
+            return
+        }
+
+        const nextBook = bookUI.nextElementSibling
+
+        bookUI.remove()
+
+        this.renderBook(book, modules, userId)
+
+        const updatedBookUI = document.querySelector(`#list .card[data-id="${book.id}"]`)
+
+        if (nextBook) {
+            document.getElementById('list').insertBefore(updatedBookUI, nextBook)
+        }
     }
 
     resetBookForm() {
         document.getElementById('bookForm').reset()
+        document.getElementById('id').value = ''
+        this.setFormMode('add')
     }
 
     showMessage(type, message) {
@@ -140,6 +232,39 @@ export default class View {
         if (type === 'info') {
             setTimeout(() => { messageUI.remove() }, 3000)
         }
+    }
+
+    setFormMode(mode) {
+        const title = document.querySelector('#form h2')
+        const bookId = document.getElementById('book-id')
+
+        if (mode === 'edit') {
+            title.textContent = 'Editar libro'
+            bookId.classList.remove('hidden')
+        } else {
+            title.textContent = 'Añadir libro'
+            bookId.classList.add('hidden')
+        }
+    }
+
+    fillBookForm(book) {
+        document.getElementById('id').value = book.id
+        document.getElementById('moduleCode').value = book.moduleCode
+        document.getElementById('publisher').value = book.publisher
+        document.getElementById('price').value = book.price
+        document.getElementById('pages').value = book.pages
+        document.getElementById('photo').value = book.photo
+        document.getElementById('comments').value = book.comments
+
+        document.querySelector(`input[name="status"][value="${book.status}"]`).checked = true
+    }
+
+    confirmDelete(message) {
+        return window.confirm(message)
+    }
+
+    updateCartCount(count) {
+        document.getElementById('cart-count').textContent = count
     }
 }
 

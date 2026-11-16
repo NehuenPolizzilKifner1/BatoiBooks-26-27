@@ -1879,7 +1879,7 @@
       "userId": 2,
       "moduleCode": "5025",
       "publisher": "Apunts",
-      "price": 12,
+      "price": 20,
       "pages": 25,
       "status": "good",
       "photo": "",
@@ -1895,7 +1895,7 @@
       "status": "new",
       "photo": "",
       "comments": "Sense obrir",
-      "soldDate": "",
+      "soldDate": "2023-02-01",
       "id": 6
     },
     {
@@ -1945,6 +1945,18 @@
       "comments": "",
       "soldDate": "",
       "id": 10
+    },
+    {
+      "id": 11,
+      "userId": 2,
+      "moduleCode": "0011",
+      "publisher": "nehuen",
+      "price": 30,
+      "pages": 90,
+      "status": "new",
+      "photo": "https://tse4.mm.bing.net/th/id/OIP.8JymtnyowJcpl_HahHlIBAHaEc?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+      "comments": "hola (editado por segunda vez)",
+      "soldDate": ""
     }
   ]
 }
