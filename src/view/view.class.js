@@ -1,10 +1,14 @@
 export default class View {
 
-    bindEvents(onSaveBook, onRemoveBook, onEditBook, onAddToCart, onRouteChange, onResetForm) {
+    bindEvents(onSaveBook, onRemoveBook, onEditBook, onAddToCart, onRouteChange, onResetForm, onModuleChange) {
 
         document.getElementById('bookForm').addEventListener('submit', (event) => {
 
             event.preventDefault()
+
+            if (!this.validateForm()) {
+                return
+            }
 
             const bookData = {
                 moduleCode: document.getElementById('moduleCode').value,
@@ -21,6 +25,7 @@ export default class View {
         })
 
         document.getElementById('bookForm').addEventListener('reset', () => {
+            this.clearValidation()
             onResetForm()
         })
 
@@ -51,6 +56,24 @@ export default class View {
 
         window.addEventListener('hashchange', () => {
             onRouteChange(window.location.hash)
+        })
+
+        const fields = document.querySelectorAll('#moduleCode, #publisher, #price, #pages, input[name="status"]')
+
+        fields.forEach(field => {
+            const eventType = field.type === 'radio' || field.tagName === 'SELECT'
+                ? 'change'
+                : 'input'
+
+            field.addEventListener(eventType, () => {
+                if (field.name === 'moduleCode') {
+                    this.setModuleError('')
+                    this.validateForm(field.name)
+                    onModuleChange(field.value)
+                } else {
+                    this.validateForm(field.name)
+                }
+            })
         })
     }
 
@@ -194,6 +217,7 @@ export default class View {
         document.getElementById('bookForm').reset()
         document.getElementById('id').value = ''
         this.setFormMode('add')
+        this.clearValidation()
     }
 
     showMessage(type, message) {
@@ -248,6 +272,9 @@ export default class View {
     }
 
     fillBookForm(book) {
+
+        this.clearValidation()
+
         document.getElementById('id').value = book.id
         document.getElementById('moduleCode').value = book.moduleCode
         document.getElementById('publisher').value = book.publisher
@@ -265,6 +292,79 @@ export default class View {
 
     updateCartCount(count) {
         document.getElementById('cart-count').textContent = count
+    }
+
+    validateForm(fieldName = null) {
+        const fields = {
+            moduleCode: document.getElementById('moduleCode'),
+            publisher: document.getElementById('publisher'),
+            price: document.getElementById('price'),
+            pages: document.getElementById('pages'),
+            status: document.querySelector('input[name="status"]')
+        }
+
+        let isValid = true
+
+        for (const name in fields) {
+            const field = fields[name]
+
+            if (fieldName !== null && fieldName !== name) {
+                continue
+            }
+
+            const error = document.getElementById(`${name}-error`)
+
+            error.textContent = ''
+
+            if (field.validity.valueMissing) {
+                error.textContent = 'Este campo es obligatorio.'
+                isValid = false
+            } else if (field.validity.customError) {
+                error.textContent = field.validationMessage
+                isValid = false
+            } else if (field.validity.badInput) {
+                error.textContent = 'Introduce un valor válido.'
+                isValid = false
+            } else if (field.validity.rangeUnderflow) {
+                error.textContent = name === 'price'
+                    ? 'El precio no puede ser negativo.'
+                    : 'El número de páginas debe ser como mínimo 1.'
+                isValid = false
+            } else if (name === 'pages' && !Number.isInteger(Number(field.value))) {
+                error.textContent = 'El número de páginas debe ser un número entero.'
+                isValid = false
+            } else if (name === 'price' && field.validity.stepMismatch) {
+                error.textContent = 'El precio debe tener como máximo dos decimales.'
+                isValid = false
+            }
+        }
+
+        return isValid
+    }
+
+    clearValidation() {
+        
+        const fields = [
+            'moduleCode',
+            'publisher',
+            'price',
+            'pages',
+            'status'
+        ]
+
+        fields.forEach(name => {
+            document.getElementById(`${name}-error`).textContent = ''
+        })
+
+        document.getElementById('moduleCode').setCustomValidity('')
+    }
+
+    setModuleError(message) {
+        const field = document.getElementById('moduleCode')
+        const error = document.getElementById('moduleCode-error')
+
+        field.setCustomValidity(message)
+        error.textContent = message
     }
 }
 

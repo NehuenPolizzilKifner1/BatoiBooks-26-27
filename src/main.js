@@ -35,7 +35,7 @@ document.querySelector('#app').innerHTML = `
             <div id="form">
                 <h2>Añadir libro</h2>
 
-                <form id="bookForm">
+                <form id="bookForm" novalidate>
                     <div id="book-id" class="hidden">
                         <label for="id">ID:</label>
                         <input id="id" name="id" type="text" readonly>
@@ -46,21 +46,25 @@ document.querySelector('#app').innerHTML = `
                         <select id="moduleCode" name="moduleCode" required>
                             <option value="">Selecciona un módulo</option>
                         </select>
+                        <small id="moduleCode-error"></small>
                     </div>
 
                     <div>
                         <label for="publisher">Publisher:</label>
                         <input id="publisher" name="publisher" type="text" required>
+                        <small id="publisher-error"></small>
                     </div>
 
                     <div>
                         <label for="price">Price (€):</label>
-                        <input id="price" name="price" type="number" min="0" required>
+                        <input id="price" name="price" type="number" min="0" step="0.01" required>
+                        <small id="price-error"></small>
                     </div>
 
                     <div>
                         <label for="pages">Pages:</label>
-                        <input id="pages" name="pages" type="number" min="1" required>
+                        <input id="pages" name="pages" type="number" min="1" step="any" required>
+                        <small id="pages-error"></small>
                     </div>
 
                     <div>
@@ -70,6 +74,7 @@ document.querySelector('#app').innerHTML = `
                         <input type="radio" id="used" name="status" value="used" required>used
                         <input type="radio" id="bad" name="status" value="bad" required>bad
                         <input type="radio" id="digital" name="status" value="digital" required>digital
+                        <small id="status-error"></small>
                     </div>
 
                     <div>

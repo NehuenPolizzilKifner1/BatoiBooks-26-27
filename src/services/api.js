@@ -22,6 +22,10 @@ async function getDBBooks() {
     return await request('/books')
 }
 
+async function getDBBooksByUserAndModule(userId, moduleCode) {
+    return await request(`/books?userId=${userId}&moduleCode=${moduleCode}`)
+}
+
 async function getDBUsers() {
     return await request('/users')
 }
@@ -91,5 +95,6 @@ export {
     removeDBBook,
     removeDBUser,
     changeDBBook,
-    changeDBUser
+    changeDBUser,
+    getDBBooksByUserAndModule
 }

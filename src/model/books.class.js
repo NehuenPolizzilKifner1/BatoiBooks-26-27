@@ -1,5 +1,5 @@
 import Book from './book.class.js'
-import { getDBBooks, addDBBook, removeDBBook, changeDBBook } from '../services/api.js'
+import { getDBBooks, addDBBook, removeDBBook, changeDBBook, getDBBooksByUserAndModule } from '../services/api.js'
 const pub = "Apunts"
 export default class Books {
     constructor() {
@@ -88,14 +88,10 @@ export default class Books {
         return this.data.filter(libros => libros.publisher === pub)
     }
 
-    bookExists(userId, moduleCode) {
-        const libro = this.data.find(libro => libro.userId === userId && libro.moduleCode === moduleCode)
+    async bookExists(userId, moduleCode) {
+        const books = await getDBBooksByUserAndModule(userId, moduleCode)
 
-        if (!libro) {
-            return false
-        }
-        return true
-
+        return books.length > 0
     }
 
     booksNotSold() {

@@ -1957,6 +1957,18 @@
       "photo": "https://tse4.mm.bing.net/th/id/OIP.8JymtnyowJcpl_HahHlIBAHaEc?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
       "comments": "hola (editado por segunda vez)",
       "soldDate": ""
+    },
+    {
+      "moduleCode": "0015",
+      "publisher": "nehuen",
+      "price": 12,
+      "pages": 121,
+      "status": "new",
+      "photo": "",
+      "comments": "",
+      "userId": 2,
+      "soldDate": "",
+      "id": 12
     }
   ]
 }

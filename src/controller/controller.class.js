@@ -12,13 +12,14 @@ export default class Controller {
         this.modules = new Modules()
         this.cart = new Cart()
         this.editingBookId = null
+        this.moduleCheckId = 0
     }
-    
+
     editBook(id) {
         this.view.navigateTo(`edit/${id}`)
     }
 
-    
+
     async init() {
 
         try {
@@ -35,7 +36,7 @@ export default class Controller {
                 this.view.renderBook(book, this.modules.data, USER_ID)
             })
 
-            this.view.bindEvents(this.saveBook.bind(this), this.removeBook.bind(this), this.editBook.bind(this), this.addToCart.bind(this), this.handleRoute.bind(this), this.resetForm.bind(this))
+            this.view.bindEvents(this.saveBook.bind(this), this.removeBook.bind(this), this.editBook.bind(this), this.addToCart.bind(this), this.handleRoute.bind(this), this.resetForm.bind(this), this.checkModule.bind(this))
 
             this.handleRoute(this.view.getCurrentRoute())
         } catch (error) {
@@ -45,6 +46,31 @@ export default class Controller {
 
     async saveBook(bookData) {
         try {
+
+            this.moduleCheckId++
+
+            let oldBook = null
+
+            if (this.editingBookId !== null) {
+                oldBook = this.books.getBookById(this.editingBookId)
+            }
+
+            if (oldBook === null || oldBook.moduleCode !== bookData.moduleCode) {
+                let exists
+
+                try {
+                    exists = await this.books.bookExists(USER_ID, bookData.moduleCode)
+                } catch (error) {
+                    this.view.showMessage('error', 'No se ha podido comprobar si ya tienes un libro de este módulo.')
+                    return
+                }
+
+                if (exists) {
+                    this.view.setModuleError('Ya tienes un libro a la venta de este módulo.')
+                    return
+                }
+            }
+
             if (this.editingBookId === null) {
                 const newBook = {
                     ...bookData,
@@ -57,8 +83,6 @@ export default class Controller {
                 this.view.renderBook(book, this.modules.data, USER_ID)
                 this.view.showMessage('info', 'Libro añadido correctamente.')
             } else {
-                const oldBook = this.books.getBookById(this.editingBookId)
-
                 const updatedBook = {
                     ...oldBook,
                     ...bookData,
@@ -168,6 +192,42 @@ export default class Controller {
             }
         } catch (error) {
             this.view.showMessage('error', 'No se ha podido añadir el libro al carrito.')
+        }
+    }
+
+    async checkModule(moduleCode) {
+
+        const requestId = ++this.moduleCheckId
+
+        try {
+            if (this.editingBookId !== null) {
+                const currentBook = this.books.getBookById(this.editingBookId)
+
+                if (currentBook.moduleCode === moduleCode) {
+                    this.view.setModuleError('')
+                    return
+                }
+            }
+
+            if (!moduleCode) {
+                this.view.setModuleError('')
+                return
+            }
+
+            const exists = await this.books.bookExists(USER_ID, moduleCode)
+
+            if (requestId !== this.moduleCheckId) return
+
+            if (exists) {
+                this.view.setModuleError('Ya tienes un libro a la venta de este módulo.')
+            } else {
+                this.view.setModuleError('')
+            }
+        } catch (error) {
+            if (requestId !== this.moduleCheckId) return
+
+            this.view.setModuleError('')
+            this.view.showMessage('error', 'No se ha podido comprobar si ya tienes un libro de este módulo.')
         }
     }
 }
